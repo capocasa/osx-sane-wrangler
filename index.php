@@ -8,6 +8,7 @@
 require 'vendor/autoload.php';
 
 $linesFile = __DIR__.'/cache/osxsane/versions';
+$base = 'http://www.ellert.se/';
 
 # Populate parameters
 $version = isset($_GET['version']) ? $_GET['version']  : null;
@@ -36,7 +37,7 @@ if (null == $tool) {
   $errs[] = 'Chose tool: '. implode(' ', array_map(function ($tool) use ($version) {return "<a href='?tool=$tool&version=$version'>$tool</a>";}, $tools));
 }
 if (null == $version) {  
-  $errs[] = 'Use on OSX or enter version <form style="display:inline" method="get" action=""><input name="tool" value="'.$tool.'" type="hidden"><input name="version" value="10.6"><input type="submit" value="Go"></form>';
+  $errs[] = 'You do not appear to be running OSX, so could not autodetect the right version. Please enter it: <form style="display:inline" method="get" action=""><input name="tool" value="'.$tool.'" type="hidden"><input name="version" value="10.6"><input type="submit" value="Go"></form>';
 }
 
 # Compile errors
@@ -48,4 +49,9 @@ if (count($errs) > 0) {
 
 $lines = file($linesFile, FILE_IGNORE_NEW_LINES);
 
+$links = array_filter($lines, function ($line) use ($version, $tool) { "$tool $version $line"; return strpos($line, $version) !== false && strpos($line, $tool) !== false; });
+
+$link = reset($links); # newest
+
+header("Location: $base/$link");
 
